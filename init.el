@@ -9,7 +9,7 @@
    ["black" "red3" "ForestGreen" "yellow3" "blue" "magenta3" "DeepSkyBlue" "gray50"])
  '(auth-source-save-behavior nil)
  '(package-selected-packages
-   '(windresize helm sr-speedbar kconfig-mode arduino-mode docker-tramp gitlab-ci-mode dockerfile-mode markdown-mode gnuplot flycheck better-defaults elpy org-edna auctex)))
+   '(julia-mode windresize helm sr-speedbar kconfig-mode arduino-mode docker-tramp gitlab-ci-mode dockerfile-mode markdown-mode gnuplot flycheck better-defaults elpy org-edna auctex)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -55,8 +55,6 @@
 	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (package-initialize)
 
-(add-to-list 'load-path "~/.emacs.d/julia-emacs/")
-(require 'julia-mode)
 
 ;; CMake syntax highlighting
 (add-to-list 'load-path "~/.emacs.d/cmake-emacs/")
