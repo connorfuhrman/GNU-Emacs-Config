@@ -28,6 +28,11 @@
 ;; Display line numbers by default
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
+;; Confirm to exit
+(add-hook 'kill-emacs-query-functions
+          (lambda () (y-or-n-p "Do you really want to exit Emacs? "))
+          'append)
+
 ;; helm-M-x as default M-x
 
 ;; Color codes for Tramp compile
