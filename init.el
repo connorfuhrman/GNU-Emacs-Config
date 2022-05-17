@@ -1,21 +1,38 @@
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(ansi-color-names-vector
-   ["black" "red3" "ForestGreen" "yellow3" "blue" "magenta3" "DeepSkyBlue" "gray50"])
- '(auth-source-save-behavior nil)
- '(package-selected-packages
-   '(julia-mode windresize helm sr-speedbar kconfig-mode arduino-mode docker-tramp gitlab-ci-mode dockerfile-mode markdown-mode gnuplot flycheck better-defaults elpy org-edna auctex)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; (custom-set-variables
+;;  ;; custom-set-variables was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  '(ansi-color-faces-vector
+;;    [default default default italic underline success warning error])
+;;  '(ansi-color-names-vector
+;;    ["black" "red3" "ForestGreen" "yellow3" "blue" "magenta3" "DeepSkyBlue" "gray50"])
+;;  '(auth-source-save-behavior nil)
+;;  '(highlight-indent-guides-method (quote bitmap))
+;;  '(package-selected-packages
+;;    (quote
+;;     (highlight-indent-guides hl-todo treemacs lsp-ui lsp-mode julia-mode windresize helm sr-speedbar kconfig-mode arduino-mode docker-tramp gitlab-ci-mode dockerfile-mode markdown-mode gnuplot flycheck better-defaults elpy org-edna auctex))))
+;; (custom-set-faces
+;;  ;; custom-set-faces was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  )
+
+;; Package setup
+(package-initialize)
+(add-to-list `package-archives
+	     '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list `package-archives
+	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(require `package)
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
+
 
 ;(add-to-list 'load-path "~/.emacs.d/")
 ;(load "chpl-mode.el")
@@ -33,8 +50,6 @@
           (lambda () (y-or-n-p "Do you really want to exit Emacs? "))
           'append)
 
-;; helm-M-x as default M-x
-
 ;; Color codes for Tramp compile
 (require 'ansi-color)
 (defun colorize-compilation-buffer ()
@@ -51,14 +66,6 @@
 			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/ICE_Rover.org"
 			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/Breadcrumbs.org"
 			     "/Users/connorfuhrman/iCloud/UArizona/ECE275/ECE275_FS2021/org/ECE275.org"))
-
-;; MELPA setup
-(require `package)
-(add-to-list `package-archives
-	     '("melpa" . "https://melpa.org/packages/") t)
-(add-to-list `package-archives
-	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-(package-initialize)
 
 
 ;; CMake syntax highlighting
@@ -105,25 +112,59 @@
 (defadvice load-theme (before disable-themes-first activate)
   (disable-all-themes))
 
+;; Enable indent guides by default
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(require 'highlight-indent-guides)
+(setq highlight-indent-guides-method 'column)
+(setq highlight-indent-guides-auto-enabled nil)
+
+;; ==================================================
+;; LSP setup
+(require 'lsp-mode)
+(add-hook 'python-mode-hook #'lsp)
+(lsp-register-client
+ (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
+		  :major-modes '(python-mode)
+		  :remote? t
+		  :server-id 'pylsp-remote))
+
+;; ==================================================
+
+;; Python black (formatter) configuration
+(use-package python-black
+	     :demand t
+	     :after python
+	     :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
 
 ;; Python configuration:
-(elpy-enable)
+;;(elpy-enable)
 ;; Enable Flycheck
-(when (require 'flycheck nil t)
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  (add-hook 'elpy-mode-hook 'flycheck-mode))
-(setq
- python-shell-interpreter "ipython"
- python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt"
- python-shell-prompt-regexp "In \\[[0-9]+\\]: "
- python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
- python-shell-completion-setup-code
- "from IPython.core.completerlib import module_completion"
- python-shell-completion-module-string-code
- "';'.join(module_completion('''%s'''))\n"
- python-shell-completion-string-code
- "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+;;(when (require 'flycheck nil t)
+;;  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+;;  (add-hook 'elpy-mode-hook 'flycheck-mode))
+;;(setq
+;; python-shell-interpreter "ipython"
+;; python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt"
+;; python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+;; python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+;; python-shell-completion-setup-code
+;; "from IPython.core.completerlib import module_completion"
+;; python-shell-completion-module-string-code
+;; "';'.join(module_completion('''%s'''))\n"
+;; python-shell-completion-string-code
+;; "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
 
+
+;; pyenv setup
+(use-package pyenv-mode
+  :init
+  (add-to-list 'exec-path "~/.pyenv/shims")
+  (setenv "WORKON_HOME" "~/.pyenv/versions/")
+  :config
+  (pyenv-mode)
+  :bind
+  ("C-x p e" . pyenv-activate-current-project))
 
 ;; ======================================================================
 ;; Docview automatic resize to fit page, width, and height
