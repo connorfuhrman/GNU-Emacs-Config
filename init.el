@@ -68,10 +68,6 @@
 			     "/Users/connorfuhrman/iCloud/UArizona/ECE275/ECE275_FS2021/org/ECE275.org"))
 
 
-;; CMake syntax highlighting
-(add-to-list 'load-path "~/.emacs.d/cmake-emacs/")
-(require 'cmake-mode)
-
 ;; Backup files
 (setq
    backup-by-copying t      ; don't clobber symlinks
@@ -132,28 +128,10 @@
 
 ;; Python black (formatter) configuration
 (use-package python-black
-	     :demand t
-	     :after python
-	     :hook (python-mode . python-black-on-save-mode-enable-dwim))
-
-
-;; Python configuration:
-;;(elpy-enable)
-;; Enable Flycheck
-;;(when (require 'flycheck nil t)
-;;  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-;;  (add-hook 'elpy-mode-hook 'flycheck-mode))
-;;(setq
-;; python-shell-interpreter "ipython"
-;; python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt"
-;; python-shell-prompt-regexp "In \\[[0-9]+\\]: "
-;; python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
-;; python-shell-completion-setup-code
-;; "from IPython.core.completerlib import module_completion"
-;; python-shell-completion-module-string-code
-;; "';'.join(module_completion('''%s'''))\n"
-;; python-shell-completion-string-code
-;; "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+  :ensure t
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
 
 ;; pyenv setup
@@ -165,6 +143,25 @@
   (pyenv-mode)
   :bind
   ("C-x p e" . pyenv-activate-current-project))
+(defun pyenv-activate-current-project ()
+  "Automatically activates pyenv version if .python-version file exists."
+  (interactive)
+  (let ((python-version-directory (locate-dominating-file (buffer-file-name) ".python-version")))
+    (if python-version-directory
+        (let* ((pyenv-version-path (f-expand ".python-version" python-version-directory))
+               (pyenv-current-version (s-trim (f-read-text pyenv-version-path 'utf-8))))
+          (pyenv-mode-set pyenv-current-version)
+          (message (concat "Setting virtualenv to " pyenv-current-version))))))
+;; (defvar pyenv-current-version nil nil)
+
+;; (defun pyenv-init()
+;;   "Initialize pyenv's current version to the global one."
+;;   (let ((global-pyenv (replace-regexp-in-string "\n" "" (shell-command-to-string "pyenv global"))))
+;;     (message (concat "Setting pyenv version to " global-pyenv))
+;;     (pyenv-mode-set global-pyenv)
+;;     (setq pyenv-current-version global-pyenv)))
+
+;(add-hook 'python-mode-hook 'pyenv-init)
 
 ;; ======================================================================
 ;; Docview automatic resize to fit page, width, and height
