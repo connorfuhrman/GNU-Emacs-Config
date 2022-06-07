@@ -79,6 +79,13 @@
    version-control t)       ; use versioned backups
 
 
+;; (helm-mode)
+;; (require 'helm-xref)
+;; (define-key global-map [remap find-file] #'helm-find-files)
+;; (define-key global-map [remap execute-extended-command] #'helm-M-x)
+;; (define-key global-map [remap switch-to-buffer] #'helm-mini)
+
+
 (setq c-default-style "linux"
       c-basic-offset 2)
 
@@ -114,24 +121,68 @@
 (setq highlight-indent-guides-method 'column)
 (setq highlight-indent-guides-auto-enabled nil)
 
+;; direnv setup
+(use-package envrc
+  :ensure t)
+(envrc-global-mode)
+
+(use-package helm
+  :ensure t
+  :init
+  (when (executable-find "curl")
+    (setq helm-google-suggest-use-curl-p t))
+  (setq helm-split-window-in-side-p           t 
+	helm-move-to-line-cycle-in-source     t 
+	helm-ff-search-library-in-sexp        t 
+	helm-scroll-amount                    8 
+	helm-ff-file-name-history-use-recentf t
+	helm-echo-input-in-header-line t)
+  :config
+  (helm-autoresize-mode 1)
+  (helm-mode)
+  :bind
+  ("M-x" . helm-M-x))
+
 ;; ==================================================
 ;; LSP setup
 (require 'lsp-mode)
-(add-hook 'python-mode-hook #'lsp)
-(lsp-register-client
- (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
-		  :major-modes '(python-mode)
-		  :remote? t
-		  :server-id 'pylsp-remote))
+;;(which-key-mode)
+(add-hook 'python-mode-hook #'lsp-deferred)
+(add-hook 'c-mode-hook 'lsp-deferred)
+(add-hook 'c++-mode-hook 'lsp-deferred)
+(setq lsp-clients-clangd-args
+      '("--header-insertion=never"))
+(use-package lsp-java
+  :ensure t
+  :config (add-hook `java-mode-hook `lsp-deferred))
+(use-package dap-java
+  :ensure nil)
+(use-package helm-lsp
+  :ensure t)
+(use-package lsp-treemacs
+  :ensure t)
+
+;; (lsp-register-client
+;;  (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
+;; 		  :major-modes '(python-mode)
+;; 		  :remote? t
+;; 		  :server-id 'pylsp-remote))
+;;(setq lsp-pylsp-plugins-flake8-enabled nil)
+
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+  (require 'dap-cpptools)
+    (yas-global-mode))
 
 ;; ==================================================
 
 ;; Python black (formatter) configuration
-(use-package python-black
-  :ensure t
-  :demand t
-  :after python
-  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+;; (use-package python-black
+;;   :ensure t
+;;   :demand t
+;;   :after python
+;;   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
 
 ;; pyenv setup
@@ -262,3 +313,20 @@ don't cause as much overhead."
 (add-hook 'doc-view-mode-hook 'doc-view-autofit-mode)
 
 ;; ===========================================================================
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("776c1ab52648f98893a2aa35af2afc43b8c11dd3194a052e0b2502acca02bfce" default)))
+ '(package-selected-packages
+   (quote
+    (buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

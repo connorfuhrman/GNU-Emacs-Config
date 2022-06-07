@@ -2,3 +2,8 @@ tramp
 elpy
 .lsp-session*
 .cache
+elpa
+.dap-breakpoints
+auto-save-list
+eclipse.jdt.ls
+workspace
