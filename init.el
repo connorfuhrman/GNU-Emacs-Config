@@ -1,24 +1,3 @@
-;; (custom-set-variables
-;;  ;; custom-set-variables was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(ansi-color-faces-vector
-;;    [default default default italic underline success warning error])
-;;  '(ansi-color-names-vector
-;;    ["black" "red3" "ForestGreen" "yellow3" "blue" "magenta3" "DeepSkyBlue" "gray50"])
-;;  '(auth-source-save-behavior nil)
-;;  '(highlight-indent-guides-method (quote bitmap))
-;;  '(package-selected-packages
-;;    (quote
-;;     (highlight-indent-guides hl-todo treemacs lsp-ui lsp-mode julia-mode windresize helm sr-speedbar kconfig-mode arduino-mode docker-tramp gitlab-ci-mode dockerfile-mode markdown-mode gnuplot flycheck better-defaults elpy org-edna auctex))))
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  )
-
 ;; Package setup
 (package-initialize)
 (add-to-list `package-archives
@@ -33,9 +12,6 @@
 (eval-when-compile
   (require 'use-package))
 
-
-;(add-to-list 'load-path "~/.emacs.d/")
-;(load "chpl-mode.el")
 
 (set-keyboard-coding-system nil)
 
@@ -62,28 +38,21 @@
 
 
 ;; Set org mode agenda files
-(setq org-agenda-files (list "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/general.org"
-			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/ICE_Rover.org"
-			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/Breadcrumbs.org"
-			     "/Users/connorfuhrman/iCloud/UArizona/ECE275/ECE275_FS2021/org/ECE275.org"))
+;; (setq org-agenda-files (list "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/general.org"
+;; 			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/ICE_Rover.org"
+;; 			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/Breadcrumbs.org"
+;; 			     "/Users/connorfuhrman/iCloud/UArizona/ECE275/ECE275_FS2021/org/ECE275.org"))
 
 
 ;; Backup files
 (setq
    backup-by-copying t      ; don't clobber symlinks
    backup-directory-alist
-    '(("." . "~/.saves/"))    ; don't litter my fs tree
+    '(("." . "~/.emacs.d/.saves/"))    ; don't litter my fs tree
    delete-old-versions t
    kept-new-versions 6
    kept-old-versions 2
    version-control t)       ; use versioned backups
-
-
-;; (helm-mode)
-;; (require 'helm-xref)
-;; (define-key global-map [remap find-file] #'helm-find-files)
-;; (define-key global-map [remap execute-extended-command] #'helm-M-x)
-;; (define-key global-map [remap switch-to-buffer] #'helm-mini)
 
 
 (setq c-default-style "linux"
@@ -94,6 +63,7 @@
     '(progn
        (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
        (define-key flyspell-mouse-map [mouse-3] #'undefined)))
+
 
 (autoload 'octave-mode "octave-mod" nil t)
 (setq auto-mode-alist
@@ -116,15 +86,18 @@
   (disable-all-themes))
 
 ;; Enable indent guides by default
-(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-(require 'highlight-indent-guides)
-(setq highlight-indent-guides-method 'column)
-(setq highlight-indent-guides-auto-enabled nil)
+(use-package highlight-indent-guides
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  (require 'highlight-indent-guides)
+  (setq highlight-indent-guides-method 'column)
+  (setq highlight-indent-guides-auto-enabled nil))
 
 ;; direnv setup
 (use-package envrc
-  :ensure t)
-(envrc-global-mode)
+  :ensure t
+  :init (envrc-global-mode))
 
 (use-package helm
   :ensure t
@@ -145,13 +118,14 @@
 
 ;; ==================================================
 ;; LSP setup
-(require 'lsp-mode)
-;;(which-key-mode)
-(add-hook 'python-mode-hook #'lsp-deferred)
-(add-hook 'c-mode-hook 'lsp-deferred)
-(add-hook 'c++-mode-hook 'lsp-deferred)
-(setq lsp-clients-clangd-args
-      '("--header-insertion=never"))
+(use-package 'lsp-mode
+  :ensure t
+  :config
+  (add-hook 'python-mode-hook #'lsp-deferred)
+  (add-hook 'c-mode-hook 'lsp-deferred)
+  (add-hook 'c++-mode-hook 'lsp-deferred)
+  (setq lsp-clients-clangd-args
+	'("--header-insertion=never")))
 (use-package lsp-java
   :ensure t
   :config (add-hook `java-mode-hook `lsp-deferred))
@@ -169,7 +143,8 @@
 ;; 		  :server-id 'pylsp-remote))
 ;;(setq lsp-pylsp-plugins-flake8-enabled nil)
 
-
+(use-package yasnippet
+  :ensure t)
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
   (require 'dap-cpptools)
@@ -192,6 +167,7 @@
 
 ;; pyenv setup
 (use-package pyenv-mode
+  :ensure t
   :init
   (add-to-list 'exec-path "~/.pyenv/shims")
   (setenv "WORKON_HOME" "~/.pyenv/versions/")
@@ -217,7 +193,20 @@
 ;;     (pyenv-mode-set global-pyenv)
 ;;     (setq pyenv-current-version global-pyenv)))
 
-;(add-hook 'python-mode-hook 'pyenv-init)
+					;(add-hook 'python-mode-hook 'pyenv-init)
+
+
+;; ======================================================================
+;; Container setup
+(use-package dockerfile-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
+  (add-to-list 'auto-mode-alist '("\\.dockerfile\\'" . dockerfile-mode)))
+(use-package docker
+  :ensure t
+  :bind ("C-c d" . docker))
+;; ======================================================================
 
 ;; ======================================================================
 ;; Docview automatic resize to fit page, width, and height
