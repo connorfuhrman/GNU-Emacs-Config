@@ -173,7 +173,12 @@
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
   (require 'dap-cpptools)
-    (yas-global-mode))
+  (yas-global-mode))
+
+;; ==================================================
+;; RealGUD Debugger Setup
+(use-package realgud
+  :ensure t )
 
 ;; ==================================================
 
@@ -323,7 +328,7 @@ don't cause as much overhead."
     ("776c1ab52648f98893a2aa35af2afc43b8c11dd3194a052e0b2502acca02bfce" default)))
  '(package-selected-packages
    (quote
-    (buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode))))
+    (realgud htmlize buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
