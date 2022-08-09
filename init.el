@@ -118,7 +118,7 @@
 
 ;; ==================================================
 ;; LSP setup
-(use-package 'lsp-mode
+(use-package lsp-mode
   :ensure t
   :config
   (add-hook 'python-mode-hook #'lsp-deferred)
@@ -195,6 +195,10 @@
 
 					;(add-hook 'python-mode-hook 'pyenv-init)
 
+;; pyvenv setup
+(use-package pyvenv
+  :ensure t)
+
 
 ;; ======================================================================
 ;; Container setup
@@ -207,6 +211,12 @@
   :ensure t
   :bind ("C-c d" . docker))
 ;; ======================================================================
+
+
+;; org mode setup
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)))
 
 ;; ======================================================================
 ;; Docview automatic resize to fit page, width, and height
