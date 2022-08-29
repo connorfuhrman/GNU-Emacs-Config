@@ -313,11 +313,9 @@ don't cause as much overhead."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   (quote
-    ("776c1ab52648f98893a2aa35af2afc43b8c11dd3194a052e0b2502acca02bfce" default)))
+   '("776c1ab52648f98893a2aa35af2afc43b8c11dd3194a052e0b2502acca02bfce" default))
  '(package-selected-packages
-   (quote
-    (realgud htmlize buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode))))
+   '(realgud htmlize buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
