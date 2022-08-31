@@ -37,12 +37,6 @@
 (setq compilation-scroll-output t)
 
 
-;; Set org mode agenda files
-;; (setq org-agenda-files (list "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/general.org"
-;; 			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/ICE_Rover.org"
-;; 			     "/Users/connorfuhrman/iCloud/UArizona/VAESRL/org/Breadcrumbs.org"
-;; 			     "/Users/connorfuhrman/iCloud/UArizona/ECE275/ECE275_FS2021/org/ECE275.org"))
-
 
 ;; Backup files
 (setq
@@ -213,10 +207,64 @@
 ;; ======================================================================
 
 
+;; ======================================================================
 ;; org mode setup
+(use-package org
+  :ensure t
+  :pin gnu)
+
+(use-package htmlize
+  :ensure t)
+
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(package-initialize)
+(use-package org-contrib
+  :ensure t)
+
+;; Babel setup
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)))
+
+;; taskjuggler setup
+(require 'ox-taskjuggler)
+
+;; calfw setup
+(use-package calfw
+  :ensure t)
+(require 'calfw-org)
+
+(setq org-agenda-entry-text-maxlines
+      50)
+
+(setq org-agenda-skip-scheduled-if-done t)
+
+(setq org-agenda-custom-commands
+      '(("u" "Upcoming deadlines" agenda "" 
+         ((org-agenda-time-grid nil)
+          (org-deadline-warning-days 0)
+          (org-agenda-entry-types '(:deadline))
+          ))
+	("w" todo "WORKING")
+	))
+
+;; Always export entry text in agenda mode
+(add-hook 'org-agenda-before-write-hook 'org-agenda-add-entry-text)
+(setq org-agenda-add-entry-text-maxlines 50)
+
+;; ======================================================================
+
+;; ======================================================================
+;; Load the local emacs init file
+;;
+;; This file holds the following
+;;  - org agenda files for this particular machine
+(let ((local_init_file  "~/.local/emacs.d/local_init.el"))
+  (when (file-exists-p local_init_file)
+    (load-file local_init_file))
+  )
+;; ======================================================================
+
 
 ;; ======================================================================
 ;; Docview automatic resize to fit page, width, and height
@@ -325,7 +373,11 @@ don't cause as much overhead."
  '(custom-safe-themes
    '("776c1ab52648f98893a2aa35af2afc43b8c11dd3194a052e0b2502acca02bfce" default))
  '(package-selected-packages
-   '(realgud htmlize buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode)))
+   '(calfw calfw-org org-plus-contrib ox-taskjuggler realgud htmlize buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode))
+ '(safe-local-variable-values
+   '((org-agenda-entry-text-maxlines . 50)
+     (org-deadline-warning-days . 0)
+     (org-deadline-warning-days . 14))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
