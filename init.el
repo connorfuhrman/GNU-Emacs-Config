@@ -124,6 +124,7 @@
   (add-hook 'python-mode-hook #'lsp-deferred)
   (add-hook 'c-mode-hook 'lsp-deferred)
   (add-hook 'c++-mode-hook 'lsp-deferred)
+  (add-hook 'shell-script-mode-hook 'lsp-deferred)
   (setq lsp-clients-clangd-args
 	'("--header-insertion=never")))
 (use-package lsp-java
@@ -216,7 +217,13 @@
 ;; org mode setup
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((python . t)))
+ '(
+   (python . t)
+   (shell . t)
+   )
+ )
+
+(setq org-export-allow-bind-keywords t)
 
 ;; ======================================================================
 ;; Docview automatic resize to fit page, width, and height
