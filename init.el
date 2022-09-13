@@ -80,13 +80,17 @@
   (disable-all-themes))
 
 ;; Enable indent guides by default
-(use-package highlight-indent-guides
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-  (require 'highlight-indent-guides)
-  (setq highlight-indent-guides-method 'column)
-  (setq highlight-indent-guides-auto-enabled nil))
+;; (use-package highlight-indent-guides
+;;   :ensure t
+;;   :init
+;;   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+;;   (require 'highlight-indent-guides)
+;;   (setq highlight-indent-guides-method 'column)
+;;   (setq highlight-indent-guides-auto-enabled nil))
+
+
+(use-package windresize
+  :ensure t)
 
 ;; direnv setup
 (use-package envrc
@@ -110,17 +114,30 @@
   :bind
   ("M-x" . helm-M-x))
 
+(use-package cmake-mode
+  :ensure t)
+
 ;; ==================================================
 ;; LSP setup
 (use-package lsp-mode
   :ensure t
+  :hook ((python-mode . lsp-deferred)
+	 (c-mode . lsp-deferred)
+	 (c++-mode . lsp-deferred)
+	 (shell-script-mode . lsp-deferred))
   :config
-  (add-hook 'python-mode-hook #'lsp-deferred)
-  (add-hook 'c-mode-hook 'lsp-deferred)
-  (add-hook 'c++-mode-hook 'lsp-deferred)
-  (add-hook 'shell-script-mode-hook 'lsp-deferred)
   (setq lsp-clients-clangd-args
-	'("--header-insertion=never")))
+   	'("--header-insertion=never"))
+  (setq lsp-auto-configure t
+	;;lsp-prefer-flymake nil
+	gc-cons-threshold (* 100 1024 1024)
+	read-process-output-max (* 1024 1024)
+	treemacs-space-between-root-nodes nil
+	company-idle-delay 0.1
+	;;company-minimum-prefix-length 1
+	lsp-idle-delay 0.1)
+  )
+(remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
 (use-package lsp-java
   :ensure t
   :config (add-hook `java-mode-hook `lsp-deferred))
@@ -128,8 +145,52 @@
   :ensure nil)
 (use-package helm-lsp
   :ensure t)
+(use-package helm-xref
+  :ensure t)
+
 (use-package lsp-treemacs
   :ensure t)
+
+(use-package company
+  :ensure t
+  :config
+  (setq lsp-completion-provider :capf))
+
+(use-package projectile
+  :ensure t)
+
+(use-package hydra
+  :ensure t)
+
+(use-package flycheck
+  :ensure t)
+
+(use-package avy
+  :ensure t)
+
+(use-package which-key
+  :ensure t)
+
+(use-package dap-mode
+  :ensure t)
+
+(use-package flymake
+  :ensure t)
+
+
+(use-package lsp-ui
+  :ensure t
+  :init
+  (setq lsp-ui-sideline-enable t
+	lsp-ui-sideline-show-symbol t
+	lsp-ui-sideline-show-hover t
+	lsp-ui-sideline-show-flycheck t
+	lsp-ui-sideline-show-code-actions t
+	lsp-ui-sideline-show-diagnostics t
+	lsp-ui-sideline-delay 0.0
+	lsp-ui-imenu-refresh-delay 0.25
+	lsp-ui-imenu-auto-refresh t))
+
 
 ;; (lsp-register-client
 ;;  (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
@@ -218,8 +279,10 @@
   :ensure t)
 
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-(package-initialize)
 (use-package org-contrib
+  :ensure t)
+
+(use-package org-edit-latex
   :ensure t)
 
 ;; Babel setup
@@ -228,6 +291,7 @@
  '(
    (python . t)
    (shell . t)
+   (latex . t)
    )
  )
 
@@ -239,7 +303,8 @@
 ;; calfw setup
 (use-package calfw
   :ensure t)
-(require 'calfw-org)
+(use-package calfw-org
+  :ensure t)
 
 (setq org-agenda-entry-text-maxlines
       50)
@@ -277,114 +342,106 @@
 ;; Docview automatic resize to fit page, width, and height
 ;; source: https://stackoverflow.com/questions/23236555/making-document-view-in-emacs-fit-to-width-of-page
 
-(require 'cl)
+;; (require 'cl)
 
-;;;; Automatic fitting minor mode
-(defcustom doc-view-autofit-timer-start 1.0
-  "Initial value (seconds) for the timer that delays the fitting when
-`doc-view-autofit-fit' is called (Which is when a window
-configuration change occurs and a document needs to be fitted)."
-  :type 'number
-  :group 'doc-view)
+;; ;;;; Automatic fitting minor mode
+;; (defcustom doc-view-autofit-timer-start 1.0
+;;   "Initial value (seconds) for the timer that delays the fitting when
+;; `doc-view-autofit-fit' is called (Which is when a window
+;; configuration change occurs and a document needs to be fitted)."
+;;   :type 'number
+;;   :group 'doc-view)
 
-(defcustom doc-view-autofit-timer-inc 0.02
-  "Value to increase (seconds) the timer (see `doc-view-autofit-timer-start')
-by, if there is another window configuration change occuring, before
-it runs out."
-  :type 'number
-  :group 'doc-view)
+;; (defcustom doc-view-autofit-timer-inc 0.02
+;;   "Value to increase (seconds) the timer (see `doc-view-autofit-timer-start')
+;; by, if there is another window configuration change occuring, before
+;; it runs out."
+;;   :type 'number
+;;   :group 'doc-view)
 
-(defcustom doc-view-autofit-default-fit 'width
-  "The fitting type initially used when mode is enabled.
-Valid values are: width, height, page."
-  :type 'symbol
-  :group 'doc-view)
+;; (defcustom doc-view-autofit-default-fit 'width
+;;   "The fitting type initially used when mode is enabled.
+;; Valid values are: width, height, page."
+;;   :type 'symbol
+;;   :group 'doc-view)
 
-(defvar doc-view-autofit-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c W") 'doc-view-autofit-width)
-    (define-key map (kbd "C-c H") 'doc-view-autofit-height)
-    (define-key map (kbd "C-c P") 'doc-view-autofit-page)
-    map)
-  "Keymap used by `doc-view-autofit-mode'.")
+;; (defvar doc-view-autofit-mode-map
+;;   (let ((map (make-sparse-keymap)))
+;;     (define-key map (kbd "C-c W") 'doc-view-autofit-width)
+;;     (define-key map (kbd "C-c H") 'doc-view-autofit-height)
+;;     (define-key map (kbd "C-c P") 'doc-view-autofit-page)
+;;     map)
+;;   "Keymap used by `doc-view-autofit-mode'.")
 
-(defun doc-view-autofit-set (type)
-  "Set autofitting to TYPE for current buffer."
-  (when doc-view-autofit-mode
-    (setq doc-view-autofit-type type)
-    (doc-view-autofit-fit)))
+;; (defun doc-view-autofit-set (type)
+;;   "Set autofitting to TYPE for current buffer."
+;;   (when doc-view-autofit-mode
+;;     (setq doc-view-autofit-type type)
+;;     (doc-view-autofit-fit)))
 
-(defun doc-view-autofit-width ()
-  "Set autofitting to width for current buffer."
-  (interactive) (doc-view-autofit-set 'width))
+;; (defun doc-view-autofit-width ()
+;;   "Set autofitting to width for current buffer."
+;;   (interactive) (doc-view-autofit-set 'width))
 
-(defun doc-view-autofit-height ()
-  "Set autofitting to height for current buffer."
-  (interactive) (doc-view-autofit-set 'height))
+;; (defun doc-view-autofit-height ()
+;;   "Set autofitting to height for current buffer."
+;;   (interactive) (doc-view-autofit-set 'height))
 
-(defun doc-view-autofit-page ()
-  "Set autofitting to page for current buffer."
-  (interactive) (doc-view-autofit-set 'page))
+;; (defun doc-view-autofit-page ()
+;;   "Set autofitting to page for current buffer."
+;;   (interactive) (doc-view-autofit-set 'page))
 
-(defun doc-view-autofit-fit ()
-  "Fits the document in the selected window's buffer
-delayed with a timer, so multiple calls in succession
-don't cause as much overhead."
-  (lexical-let
-      ((window (selected-window)))
-    (if (equal doc-view-autofit-timer nil)
-        (setq doc-view-autofit-timer
-              (run-with-timer
-               doc-view-autofit-timer-start nil
-               (lambda ()
-                 (if (window-live-p window)
-                     (save-selected-window
-                       (select-window window)
-                       (cancel-timer doc-view-autofit-timer)
-                       (setq doc-view-autofit-timer nil)
-                       (cond
-                        ((equal 'width doc-view-autofit-type)
-                         (doc-view-fit-width-to-window))
-                        ((equal 'height doc-view-autofit-type)
-                         (doc-view-fit-height-to-window))
-                        ((equal 'page doc-view-autofit-type)
-                         (doc-view-fit-page-to-window))))))))
-      (timer-inc-time doc-view-autofit-timer doc-view-autofit-timer-inc))))
+;; (defun doc-view-autofit-fit ()
+;;   "Fits the document in the selected window's buffer
+;; delayed with a timer, so multiple calls in succession
+;; don't cause as much overhead."
+;;   (lexical-let
+;;       ((window (selected-window)))
+;;     (if (equal doc-view-autofit-timer nil)
+;;         (setq doc-view-autofit-timer
+;;               (run-with-timer
+;;                doc-view-autofit-timer-start nil
+;;                (lambda ()
+;;                  (if (window-live-p window)
+;;                      (save-selected-window
+;;                        (select-window window)
+;;                        (cancel-timer doc-view-autofit-timer)
+;;                        (setq doc-view-autofit-timer nil)
+;;                        (cond
+;;                         ((equal 'width doc-view-autofit-type)
+;;                          (doc-view-fit-width-to-window))
+;;                         ((equal 'height doc-view-autofit-type)
+;;                          (doc-view-fit-height-to-window))
+;;                         ((equal 'page doc-view-autofit-type)
+;;                          (doc-view-fit-page-to-window))))))))
+;;       (timer-inc-time doc-view-autofit-timer doc-view-autofit-timer-inc))))
 
-(define-minor-mode doc-view-autofit-mode
-  "Minor mode for automatic (timer based) fitting in DocView."
-  :lighter " AFit" :keymap doc-view-autofit-mode-map :group 'doc-view
-  (when doc-view-autofit-mode
-    (set (make-local-variable 'doc-view-autofit-type)
-         doc-view-autofit-default-fit)
-    (set (make-local-variable 'doc-view-autofit-timer) nil)
-    (add-hook 'window-configuration-change-hook
-              'doc-view-autofit-fit nil t)
-    (doc-view-autofit-fit))
-  (when (not doc-view-autofit-mode)
-    (remove-hook 'window-configuration-change-hook
-                 'doc-view-autofit-fit t)
-    (when doc-view-autofit-timer
-      (cancel-timer doc-view-autofit-timer)
-      (setq doc-view-autofit-timer nil))
-    (setq doc-view-autofit-type nil)))
+;; (define-minor-mode doc-view-autofit-mode
+;;   "Minor mode for automatic (timer based) fitting in DocView."
+;;   :lighter " AFit" :keymap doc-view-autofit-mode-map :group 'doc-view
+;;   (when doc-view-autofit-mode
+;;     (set (make-local-variable 'doc-view-autofit-type)
+;;          doc-view-autofit-default-fit)
+;;     (set (make-local-variable 'doc-view-autofit-timer) nil)
+;;     (add-hook 'window-configuration-change-hook
+;;               'doc-view-autofit-fit nil t)
+;;     (doc-view-autofit-fit))
+;;   (when (not doc-view-autofit-mode)
+;;     (remove-hook 'window-configuration-change-hook
+;;                  'doc-view-autofit-fit t)
+;;     (when doc-view-autofit-timer
+;;       (cancel-timer doc-view-autofit-timer)
+;;       (setq doc-view-autofit-timer nil))
+;;     (setq doc-view-autofit-type nil)))
 
-(add-hook 'doc-view-mode-hook 'doc-view-autofit-mode)
-
-;; ===========================================================================
+;; (add-hook 'doc-view-mode-hook 'doc-view-autofit-mode)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("776c1ab52648f98893a2aa35af2afc43b8c11dd3194a052e0b2502acca02bfce" default))
  '(package-selected-packages
-   '(calfw calfw-org org-plus-contrib ox-taskjuggler realgud htmlize buffer-env minimap ubuntu-theme windresize use-package treemacs sr-speedbar python-black popup org-edna lsp-ui kconfig-mode julia-mode hl-todo highlight-indent-guides haskell-mode gnuplot gitlab-ci-mode flycheck elpy dockerfile-mode docker-tramp cmake-mode better-defaults auctex async arduino-mode))
- '(safe-local-variable-values
-   '((org-agenda-entry-text-maxlines . 50)
-     (org-deadline-warning-days . 0)
-     (org-deadline-warning-days . 14))))
+   '(org-edit-latex cmake-mode windresize which-key flycheck projectile helm-xref yasnippet use-package realgud pyvenv pyenv-mode org-contrib lsp-ui lsp-java htmlize highlight-indent-guides helm-lsp envrc dockerfile-mode docker company calfw-org calfw)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
