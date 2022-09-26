@@ -18,6 +18,14 @@
 ;; Enable mouse mode for terminal
 (xterm-mouse-mode)
 
+;; No sounds
+(setq ring-bell-function 'ignore)
+
+;; MacOS use option key as Meta
+(setq mac-command-key-is-meta nil)
+(setq mac-option-key-is-meta t)
+
+
 ;; Display line numbers by default
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 
@@ -96,6 +104,30 @@
 (use-package envrc
   :ensure t
   :init (envrc-global-mode))
+(defcustom my-direnv-enabled-hosts nil
+  "List of remote hosts to use Direnv on.
+Each host must have `direnv' executable accessible in the default
+environment."
+  :type '(repeat string)
+  :group 'my)
+
+(defun tramp-sh-handle-start-file-process@my-direnv (args)
+  "Enable Direnv for hosts in `my-direnv-enabled-hosts'."
+  (with-parsed-tramp-file-name (expand-file-name default-directory) nil
+    (if (member host my-direnv-enabled-hosts)
+        (pcase-let ((`(,name ,buffer ,program . ,args) args))
+          `(,name
+            ,buffer
+            "direnv"
+            "exec"
+            ,localname
+            ,program
+            ,@args))
+      args)))
+
+(with-eval-after-load "tramp-sh"
+  (advice-add 'tramp-sh-handle-start-file-process
+              :filter-args #'tramp-sh-handle-start-file-process@my-direnv))
 
 (use-package helm
   :ensure t
@@ -117,6 +149,9 @@
 (use-package cmake-mode
   :ensure t)
 
+(use-package julia-mode
+  :ensure t)
+
 ;; ==================================================
 ;; LSP setup
 (use-package lsp-mode
@@ -128,14 +163,17 @@
   :config
   (setq lsp-clients-clangd-args
    	'("--header-insertion=never"))
+  (setq lsp-clients-clangd-remote-args
+   	'("--header-insertion=never"))
   (setq lsp-auto-configure t
 	;;lsp-prefer-flymake nil
-	gc-cons-threshold (* 100 1024 1024)
+	gc-cons-threshold (* 500 1024 1024)
 	read-process-output-max (* 1024 1024)
 	treemacs-space-between-root-nodes nil
-	company-idle-delay 0.1
+	company-minimum-prefix-length 1
+	company-idle-delay 0.0
 	;;company-minimum-prefix-length 1
-	lsp-idle-delay 0.1)
+	lsp-idle-delay 5)
   )
 (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
 (use-package lsp-java
@@ -187,7 +225,7 @@
 	lsp-ui-sideline-show-flycheck t
 	lsp-ui-sideline-show-code-actions t
 	lsp-ui-sideline-show-diagnostics t
-	lsp-ui-sideline-delay 0.0
+	lsp-ui-sideline-delay 0.25
 	lsp-ui-imenu-refresh-delay 0.25
 	lsp-ui-imenu-auto-refresh t))
 
@@ -198,6 +236,20 @@
 ;; 		  :remote? t
 ;; 		  :server-id 'pylsp-remote))
 ;;(setq lsp-pylsp-plugins-flake8-enabled nil)
+
+(lsp-register-client
+    (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+                     :major-modes '(c-mode c++-mode)
+                     :remote? t
+                     :server-id 'clangd-remote))
+(lsp-register-client
+ (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
+                     :major-modes '(python-mode)
+                     :remote? t
+                     :server-id 'pylsp-remote)
+ )
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+(setq tramp-auto-save-directory "~/.emacs.d/tramp-autosave") ;; TRAMP save buffers locally
 
 (use-package yasnippet
   :ensure t)
@@ -440,8 +492,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auth-source-save-behavior nil)
  '(package-selected-packages
-   '(org-edit-latex cmake-mode windresize which-key flycheck projectile helm-xref yasnippet use-package realgud pyvenv pyenv-mode org-contrib lsp-ui lsp-java htmlize highlight-indent-guides helm-lsp envrc dockerfile-mode docker company calfw-org calfw)))
+   '(modern-cpp-font-lock julia-mode org-edit-latex cmake-mode windresize which-key flycheck projectile helm-xref yasnippet use-package realgud pyvenv pyenv-mode org-contrib lsp-ui lsp-java htmlize highlight-indent-guides helm-lsp envrc dockerfile-mode docker company calfw-org calfw))
+ '(warning-suppress-types '((comp) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
