@@ -2,8 +2,9 @@
 (package-initialize)
 (add-to-list `package-archives
 	     '("melpa" . "https://melpa.org/packages/") t)
-(add-to-list `package-archives
-	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+;;(add-to-list `package-archives
+;;	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
 (require `package)
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -44,6 +45,14 @@
 ;; Compile mode auto-scroll
 (setq compilation-scroll-output t)
 
+;; Nix mode
+(use-package nix-mode
+  :ensure t
+  :mode "\\.nix\\'")
+
+;; YAML-mode
+(use-package yaml-mode
+  :ensure t)
 
 
 ;; Backup files
@@ -84,8 +93,11 @@
   (dolist (i custom-enabled-themes)
     (disable-theme i)))
 
-(defadvice load-theme (before disable-themes-first activate)
-  (disable-all-themes))
+;; (defadvice load-theme (before disable-themes-first activate)
+;;   (disable-all-themes))
+
+(use-package doom-themes
+  :ensure t)
 
 ;; Enable indent guides by default
 ;; (use-package highlight-indent-guides
@@ -104,30 +116,30 @@
 (use-package envrc
   :ensure t
   :init (envrc-global-mode))
-(defcustom my-direnv-enabled-hosts nil
-  "List of remote hosts to use Direnv on.
-Each host must have `direnv' executable accessible in the default
-environment."
-  :type '(repeat string)
-  :group 'my)
+;; (defcustom my-direnv-enabled-hosts nil
+;;   "List of remote hosts to use Direnv on.
+;; Each host must have `direnv' executable accessible in the default
+;; environment."
+;;   :type '(repeat string)
+;;   :group 'my)
 
-(defun tramp-sh-handle-start-file-process@my-direnv (args)
-  "Enable Direnv for hosts in `my-direnv-enabled-hosts'."
-  (with-parsed-tramp-file-name (expand-file-name default-directory) nil
-    (if (member host my-direnv-enabled-hosts)
-        (pcase-let ((`(,name ,buffer ,program . ,args) args))
-          `(,name
-            ,buffer
-            "direnv"
-            "exec"
-            ,localname
-            ,program
-            ,@args))
-      args)))
+;; (defun tramp-sh-handle-start-file-process@my-direnv (args)
+;;   "Enable Direnv for hosts in `my-direnv-enabled-hosts'."
+;;   (with-parsed-tramp-file-name (expand-file-name default-directory) nil
+;;     (if (member host my-direnv-enabled-hosts)
+;;         (pcase-let ((`(,name ,buffer ,program . ,args) args))
+;;           `(,name
+;;             ,buffer
+;;             "direnv"
+;;             "exec"
+;;             ,localname
+;;             ,program
+;;             ,@args))
+;;       args)))
 
-(with-eval-after-load "tramp-sh"
-  (advice-add 'tramp-sh-handle-start-file-process
-              :filter-args #'tramp-sh-handle-start-file-process@my-direnv))
+;; (with-eval-after-load "tramp-sh"
+;;   (advice-add 'tramp-sh-handle-start-file-process
+;;               :filter-args #'tramp-sh-handle-start-file-process@my-direnv))
 
 (use-package helm
   :ensure t
@@ -154,33 +166,41 @@ environment."
 
 ;; ==================================================
 ;; LSP setup
+(use-package lsp-docker
+  :ensure t)
+
 (use-package lsp-mode
   :ensure t
   :hook ((python-mode . lsp-deferred)
+	 (shell-script-mode . lsp-deferred)
 	 (c-mode . lsp-deferred)
-	 (c++-mode . lsp-deferred)
-	 (shell-script-mode . lsp-deferred))
-  :config
-  (setq lsp-clients-clangd-args
-   	'("--header-insertion=never"))
-  (setq lsp-clients-clangd-remote-args
-   	'("--header-insertion=never"))
-  (setq lsp-auto-configure t
-	;;lsp-prefer-flymake nil
-	gc-cons-threshold (* 500 1024 1024)
-	read-process-output-max (* 1024 1024)
-	treemacs-space-between-root-nodes nil
-	company-minimum-prefix-length 1
-	company-idle-delay 0.0
-	;;company-minimum-prefix-length 1
-	lsp-idle-delay 5)
-  )
-(remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
-(use-package lsp-java
-  :ensure t
-  :config (add-hook `java-mode-hook `lsp-deferred))
-(use-package dap-java
-  :ensure nil)
+	 (c++-mode . lsp-deferred))
+  :config (setq lsp-auto-configure t
+		lsp-prefer-flymake nil
+		gc-cons-threshold (* 500 1024 1024)
+		read-process-output-max (* 1024 1024)
+		treemacs-space-between-root-nodes nil
+		company-minimum-prefix-length 1
+		company-idle-delay 0.0
+		company-minimum-prefix-length 1
+		lsp-idle-delay 5)
+)
+
+(setq lsp-log-io t)
+(setq lsp-docker-log-level "debug")
+
+;;  :config
+;;  (setq lsp-clients-clangd-args
+;;   	'("--header-insertion=never"))
+;;  (setq lsp-clients-clangd-remote-args
+;;   	'("--header-insertion=never"))
+
+;; (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
+;;(use-package lsp-java
+;;  :ensure t
+;;  :config (add-hook `java-mode-hook `lsp-deferred))
+;;(use-package dap-java
+;;  :ensure nil)
 (use-package helm-lsp
   :ensure t)
 (use-package helm-xref
@@ -194,33 +214,32 @@ environment."
   :config
   (setq lsp-completion-provider :capf))
 
-(use-package projectile
-  :ensure t)
+;; (use-package projectile
+;;   :ensure t)
 
-(use-package hydra
-  :ensure t)
+;; (use-package hydra
+;;   :ensure t)
 
 (use-package flycheck
   :ensure t)
 
-(use-package avy
-  :ensure t)
+;; (use-package avy
+;;   :ensure t)
 
-(use-package which-key
-  :ensure t)
+;; (use-package which-key
+;;   :ensure t)
 
-(use-package dap-mode
-  :ensure t)
+;; (use-package dap-mode
+;;   :ensure t)
 
-(use-package flymake
-  :ensure t)
+;; (use-package flymake
+;;   :ensure t)
 
 
 (use-package lsp-ui
   :ensure t
   :init
   (setq lsp-ui-sideline-enable t
-	lsp-ui-sideline-show-symbol t
 	lsp-ui-sideline-show-hover t
 	lsp-ui-sideline-show-flycheck t
 	lsp-ui-sideline-show-code-actions t
@@ -242,21 +261,22 @@ environment."
                      :major-modes '(c-mode c++-mode)
                      :remote? t
                      :server-id 'clangd-remote))
+
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-tramp-connection "pylsp")
                      :major-modes '(python-mode)
                      :remote? t
-                     :server-id 'pylsp-remote)
- )
+                     :server-id 'pylsp-remote))
+
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 (setq tramp-auto-save-directory "~/.emacs.d/tramp-autosave") ;; TRAMP save buffers locally
 
 (use-package yasnippet
   :ensure t)
-(with-eval-after-load 'lsp-mode
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
-  (require 'dap-cpptools)
-  (yas-global-mode))
+;;(with-eval-after-load 'lsp-mode
+;;  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+;;  (require 'dap-cpptools)
+;;  (yas-global-mode))
 
 ;; ==================================================
 ;; RealGUD Debugger Setup
@@ -274,24 +294,24 @@ environment."
 
 
 ;; pyenv setup
-(use-package pyenv-mode
-  :ensure t
-  :init
-  (add-to-list 'exec-path "~/.pyenv/shims")
-  (setenv "WORKON_HOME" "~/.pyenv/versions/")
-  :config
-  (pyenv-mode)
-  :bind
-  ("C-x p e" . pyenv-activate-current-project))
-(defun pyenv-activate-current-project ()
-  "Automatically activates pyenv version if .python-version file exists."
-  (interactive)
-  (let ((python-version-directory (locate-dominating-file (buffer-file-name) ".python-version")))
-    (if python-version-directory
-        (let* ((pyenv-version-path (f-expand ".python-version" python-version-directory))
-               (pyenv-current-version (s-trim (f-read-text pyenv-version-path 'utf-8))))
-          (pyenv-mode-set pyenv-current-version)
-          (message (concat "Setting virtualenv to " pyenv-current-version))))))
+;; (use-package pyenv-mode
+;;   :ensure t
+;;   :init
+;;   (add-to-list 'exec-path "~/.pyenv/shims")
+;;   (setenv "WORKON_HOME" "~/.pyenv/versions/")
+;;   :config
+;;   (pyenv-mode)
+;;   :bind
+;;   ("C-x p e" . pyenv-activate-current-project))
+;; (defun pyenv-activate-current-project ()
+;;   "Automatically activates pyenv version if .python-version file exists."
+;;   (interactive)
+;;   (let ((python-version-directory (locate-dominating-file (buffer-file-name) ".python-version")))
+;;     (if python-version-directory
+;;         (let* ((pyenv-version-path (f-expand ".python-version" python-version-directory))
+;;                (pyenv-current-version (s-trim (f-read-text pyenv-version-path 'utf-8))))
+;;           (pyenv-mode-set pyenv-current-version)
+;;           (message (concat "Setting virtualenv to " pyenv-current-version))))))
 ;; (defvar pyenv-current-version nil nil)
 
 ;; (defun pyenv-init()
@@ -304,8 +324,8 @@ environment."
 					;(add-hook 'python-mode-hook 'pyenv-init)
 
 ;; pyvenv setup
-(use-package pyvenv
-  :ensure t)
+;; (use-package pyvenv
+  ;; :ensure t)
 
 
 ;; ======================================================================
@@ -330,12 +350,12 @@ environment."
 (use-package htmlize
   :ensure t)
 
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-(use-package org-contrib
-  :ensure t)
+;;(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+;;(use-package org-contrib
+;;  :ensure t)
 
-(use-package org-edit-latex
-  :ensure t)
+;;(use-package org-edit-latex
+;;  :ensure t)
 
 ;; Babel setup
 (org-babel-do-load-languages
@@ -350,31 +370,31 @@ environment."
 (setq org-export-allow-bind-keywords t)
 
 ;; taskjuggler setup
-(require 'ox-taskjuggler)
+;;(require 'ox-taskjuggler)
 
 ;; calfw setup
-(use-package calfw
-  :ensure t)
-(use-package calfw-org
-  :ensure t)
+;;(use-package calfw
+;;  :ensure t)
+;;(use-package calfw-org
+;;  :ensure t)
 
-(setq org-agenda-entry-text-maxlines
-      50)
+;;(setq org-agenda-entry-text-maxlines
+;;      50)
 
-(setq org-agenda-skip-scheduled-if-done t)
+;;(setq org-agenda-skip-scheduled-if-done t)
 
-(setq org-agenda-custom-commands
-      '(("u" "Upcoming deadlines" agenda "" 
-         ((org-agenda-time-grid nil)
-          (org-deadline-warning-days 0)
-          (org-agenda-entry-types '(:deadline))
-          ))
-	("w" todo "WORKING")
-	))
+;;(setq org-agenda-custom-commands
+;;      '(("u" "Upcoming deadlines" agenda "" 
+;;         ((org-agenda-time-grid nil)
+;;          (org-deadline-warning-days 0)
+;;          (org-agenda-entry-types '(:deadline))
+;;          ))
+;;	("w" todo "WORKING")
+;;	))
 
 ;; Always export entry text in agenda mode
-(add-hook 'org-agenda-before-write-hook 'org-agenda-add-entry-text)
-(setq org-agenda-add-entry-text-maxlines 50)
+;;(add-hook 'org-agenda-before-write-hook 'org-agenda-add-entry-text)
+;;(setq org-agenda-add-entry-text-maxlines 50)
 
 ;; ======================================================================
 
@@ -493,8 +513,17 @@ environment."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
+ '(custom-safe-themes
+   '("5b9a45080feaedc7820894ebbfe4f8251e13b66654ac4394cb416fef9fdca789"
+     "9013233028d9798f901e5e8efb31841c24c12444d3b6e92580080505d56fd392"
+     "8c7e832be864674c220f9a9361c851917a93f921fedb7717b1b5ece47690c098"
+     "aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
+     default))
  '(package-selected-packages
-   '(modern-cpp-font-lock julia-mode org-edit-latex cmake-mode windresize which-key flycheck projectile helm-xref yasnippet use-package realgud pyvenv pyenv-mode org-contrib lsp-ui lsp-java htmlize highlight-indent-guides helm-lsp envrc dockerfile-mode docker company calfw-org calfw))
+   '(cmake-mode company docker dockerfile-mode doom-themes envrc flycheck
+		helm-lsp helm-xref htmlize julia-mode lsp-docker
+		lsp-treemacs lsp-ui nix-mode realgud windresize
+		yaml-mode yasnippet))
  '(warning-suppress-types '((comp) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -502,3 +531,17 @@ environment."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+;; (custom-set-variables
+;;  ;; custom-set-variables was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  '(package-selected-packages
+;;    '(org-edit-latex org-contrib htmlize docker dockerfile-mode pyvenv pyenv-mode realgud yasnippet lsp-ui dap-mode which-key flycheck projectile company lsp-treemacs helm-xref helm-lsp lsp-docker julia-mode cmake-mode helm envrc windresize doom-themes yaml-mode nix-mode)))
+;; (custom-set-faces
+;;  ;; custom-set-faces was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;;  )
+
