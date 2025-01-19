@@ -35,26 +35,9 @@
           (lambda () (y-or-n-p "Do you really want to exit Emacs? "))
           'append)
 
-;; ;; Emacs Application Framework
-;; (use-package eaf
-;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework")
-;; (use-package eaf-terminal
-;;   :load-path "~/.emacs.d/site-lisp/eaf-terminal")
-
-;; (require 'eaf-image-viewer)
-;; (require 'eaf-pdf-viewer)
-;; (require 'eaf-browser)
-;; (require 'eaf-markdown-previewer)
-;; (require 'eaf-file-manager)
-;; (require 'eaf-video-player)
-;; (require 'eaf-org-previewer)
-;; (require 'eaf-jupyter)
-;; (require 'eaf-git)
-;; (require 'eaf-system-monitor)
-;; (require 'eaf-pyqterminal)
-
 
 ;; vterm
+(setq vterm-module-cmake-args "-DUSE_SYSTEM_LIBVTERM=ON -DLIBVTERM_INCLUDE_DIR=/opt/homebrew/opt/libvterm/include -DLIBVTERM_LIBRARY=/opt/homebrew/opt/libvterm/lib/libvterm.dylib")
 (use-package vterm
   :ensure t
 
@@ -67,7 +50,8 @@
               
               ;; You can keep other local settings here, like:
               ;; (setq-local cursor-type nil))))
-	      )))
+	      ))
+  )
 
 
 
@@ -95,13 +79,13 @@
 
 ;; Backup files
 (setq
-   backup-by-copying t      ; don't clobber symlinks
+   backup-by-copying t                 ; don't clobber symlinks
    backup-directory-alist
     '(("." . "~/.emacs.d/.saves/"))    ; don't litter my fs tree
    delete-old-versions t
    kept-new-versions 6
    kept-old-versions 2
-   version-control t)       ; use versioned backups
+   version-control t)                  ; use versioned backups
 
 
 (setq c-default-style "linux"
@@ -117,13 +101,6 @@
 (autoload 'octave-mode "octave-mod" nil t)
 (setq auto-mode-alist
       (cons '("\\.m$" . octave-mode) auto-mode-alist))
-
-
-;; Auctex settings
-;;    source https://kevinlanguasco.wordpress.com/2019/04/29/latex-editing-with-emacs-on-manjaro/
-;; (setq TeX-auto-save t)
-;; (setq TeX-parse-self t)
-;; (setq-default TeX-master nil)
 
 ;; Theme conveniences
 (defun disable-all-themes ()
@@ -365,7 +342,8 @@ environment."
   :hook ((python-mode . lsp-deferred)
          (shell-script-mode . lsp-deferred)
          (c-mode . lsp-deferred)
-         (c++-mode . lsp-deferred))
+         (c++-mode . lsp-deferred)
+	 (rust-mode . lsp-deferred))
   :config
   ;; General LSP settings
   (setq lsp-auto-configure t
@@ -412,13 +390,13 @@ environment."
   :ensure t
   :config
   (setq lsp-ui-sideline-enable t
-        lsp-ui-sideline-show-hover nil      ; Disable hover for performance
+        lsp-ui-sideline-show-hover t
         lsp-ui-sideline-show-flycheck t
         lsp-ui-sideline-show-code-actions t
         lsp-ui-sideline-show-diagnostics t
         lsp-ui-sideline-delay 0.5           ; Increased delay
-        lsp-ui-doc-enable nil               ; Disable doc window for performance
-        lsp-ui-doc-delay 2.0                ; Increased delay if doc is enabled
+        lsp-ui-doc-enable t 
+        lsp-ui-doc-delay 0.5                ; Increased delay if doc is enabled
         lsp-ui-doc-show-with-cursor nil))   ; Only show doc on mouse hover
 
 ;; TRAMP specific settings
@@ -492,6 +470,9 @@ environment."
   ;; :ensure t)
 
 (use-package elvish-mode
+  :ensure t)
+
+(use-package rust-mode
   :ensure t)
 
 ;; ======================================================================
@@ -680,9 +661,49 @@ environment."
  ;; If there is more than one, they won't work right.
  '(auth-source-save-behavior nil)
  '(custom-safe-themes
-   '("b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19" "c517e98fa036a0c21af481aadd2bdd6f44495be3d4ac2ce9d69201fcb2578533" "6adeb971e4d5fe32bee0d5b1302bc0dfd70d4b42bad61e1c346599a6dc9569b5" "4fdbed4aa8bcb199d7f6a643886bac51178d1705b9b354ef3dd82d4ec48072d2" "e1f4f0158cd5a01a9d96f1f7cdcca8d6724d7d33267623cc433fe1c196848554" "38c0c668d8ac3841cb9608522ca116067177c92feeabc6f002a27249976d7434" "f5f80dd6588e59cfc3ce2f11568ff8296717a938edd448a947f9823a4e282b66" "6f96a9ece5fdd0d3e04daea6aa63e13be26b48717820aa7b5889c602764cf23a" "02d422e5b99f54bd4516d4157060b874d14552fe613ea7047c4a5cfa1288cf4f" "f4d1b183465f2d29b7a2e9dbe87ccc20598e79738e5d29fc52ec8fb8c576fcfd" "ffafb0e9f63935183713b204c11d22225008559fa62133a69848835f4f4a758c" "8d3ef5ff6273f2a552152c7febc40eabca26bae05bd12bc85062e2dc224cde9a" "ff24d14f5f7d355f47d53fd016565ed128bf3af30eb7ce8cae307ee4fe7f3fd0" "e3daa8f18440301f3e54f2093fe15f4fe951986a8628e98dcd781efbec7a46f2" "c1d5759fcb18b20fd95357dcd63ff90780283b14023422765d531330a3d3cec2" "df6dfd55673f40364b1970440f0b0cb8ba7149282cf415b81aaad2d98b0f0290" "014cb63097fc7dbda3edf53eb09802237961cbb4c9e9abd705f23b86511b0a69" "a44e2d1636a0114c5e407a748841f6723ed442dc3a0ed086542dc71b92a87aee" "e87fd8e24e82eb94d63b1a9c79abc8161d25de9f2f13b64014d3bf4b8db05e9a" "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350" "dc8285f7f4d86c0aebf1ea4b448842a6868553eded6f71d1de52f3dcbc960039" "13096a9a6e75c7330c1bc500f30a8f4407bd618431c94aeab55c9855731a95e1" "badd1a5e20bd0c29f4fe863f3b480992c65ef1fa63951f59aa5d6b129a3f9c4c" "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a" "da75eceab6bea9298e04ce5b4b07349f8c02da305734f7c0c8c6af7b5eaa9738" "9d29a302302cce971d988eb51bd17c1d2be6cd68305710446f658958c0640f68" "631c52620e2953e744f2b56d102eae503017047fb43d65ce028e88ef5846ea3b" "8b148cf8154d34917dfc794b5d0fe65f21e9155977a36a5985f89c09a9669aa0" "b1acc21dcb556407306eccd73f90eb7d69664380483b18496d9c5ccc5968ab43" "dccf4a8f1aaf5f24d2ab63af1aa75fd9d535c83377f8e26380162e888be0c6a9" "bf948e3f55a8cd1f420373410911d0a50be5a04a8886cabe8d8e471ad8fdba8e" "680f62b751481cc5b5b44aeab824e5683cf13792c006aeba1c25ce2d89826426" "5b9a45080feaedc7820894ebbfe4f8251e13b66654ac4394cb416fef9fdca789" "9013233028d9798f901e5e8efb31841c24c12444d3b6e92580080505d56fd392" "8c7e832be864674c220f9a9361c851917a93f921fedb7717b1b5ece47690c098" "aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8" default))
+   '("4ade6b630ba8cbab10703b27fd05bb43aaf8a3e5ba8c2dc1ea4a2de5f8d45882"
+     "b5fd9c7429d52190235f2383e47d340d7ff769f141cd8f9e7a4629a81abc6b19"
+     "c517e98fa036a0c21af481aadd2bdd6f44495be3d4ac2ce9d69201fcb2578533"
+     "6adeb971e4d5fe32bee0d5b1302bc0dfd70d4b42bad61e1c346599a6dc9569b5"
+     "4fdbed4aa8bcb199d7f6a643886bac51178d1705b9b354ef3dd82d4ec48072d2"
+     "e1f4f0158cd5a01a9d96f1f7cdcca8d6724d7d33267623cc433fe1c196848554"
+     "38c0c668d8ac3841cb9608522ca116067177c92feeabc6f002a27249976d7434"
+     "f5f80dd6588e59cfc3ce2f11568ff8296717a938edd448a947f9823a4e282b66"
+     "6f96a9ece5fdd0d3e04daea6aa63e13be26b48717820aa7b5889c602764cf23a"
+     "02d422e5b99f54bd4516d4157060b874d14552fe613ea7047c4a5cfa1288cf4f"
+     "f4d1b183465f2d29b7a2e9dbe87ccc20598e79738e5d29fc52ec8fb8c576fcfd"
+     "ffafb0e9f63935183713b204c11d22225008559fa62133a69848835f4f4a758c"
+     "8d3ef5ff6273f2a552152c7febc40eabca26bae05bd12bc85062e2dc224cde9a"
+     "ff24d14f5f7d355f47d53fd016565ed128bf3af30eb7ce8cae307ee4fe7f3fd0"
+     "e3daa8f18440301f3e54f2093fe15f4fe951986a8628e98dcd781efbec7a46f2"
+     "c1d5759fcb18b20fd95357dcd63ff90780283b14023422765d531330a3d3cec2"
+     "df6dfd55673f40364b1970440f0b0cb8ba7149282cf415b81aaad2d98b0f0290"
+     "014cb63097fc7dbda3edf53eb09802237961cbb4c9e9abd705f23b86511b0a69"
+     "a44e2d1636a0114c5e407a748841f6723ed442dc3a0ed086542dc71b92a87aee"
+     "e87fd8e24e82eb94d63b1a9c79abc8161d25de9f2f13b64014d3bf4b8db05e9a"
+     "2721b06afaf1769ef63f942bf3e977f208f517b187f2526f0e57c1bd4a000350"
+     "dc8285f7f4d86c0aebf1ea4b448842a6868553eded6f71d1de52f3dcbc960039"
+     "13096a9a6e75c7330c1bc500f30a8f4407bd618431c94aeab55c9855731a95e1"
+     "badd1a5e20bd0c29f4fe863f3b480992c65ef1fa63951f59aa5d6b129a3f9c4c"
+     "b54376ec363568656d54578d28b95382854f62b74c32077821fdfd604268616a"
+     "da75eceab6bea9298e04ce5b4b07349f8c02da305734f7c0c8c6af7b5eaa9738"
+     "9d29a302302cce971d988eb51bd17c1d2be6cd68305710446f658958c0640f68"
+     "631c52620e2953e744f2b56d102eae503017047fb43d65ce028e88ef5846ea3b"
+     "8b148cf8154d34917dfc794b5d0fe65f21e9155977a36a5985f89c09a9669aa0"
+     "b1acc21dcb556407306eccd73f90eb7d69664380483b18496d9c5ccc5968ab43"
+     "dccf4a8f1aaf5f24d2ab63af1aa75fd9d535c83377f8e26380162e888be0c6a9"
+     "bf948e3f55a8cd1f420373410911d0a50be5a04a8886cabe8d8e471ad8fdba8e"
+     "680f62b751481cc5b5b44aeab824e5683cf13792c006aeba1c25ce2d89826426"
+     "5b9a45080feaedc7820894ebbfe4f8251e13b66654ac4394cb416fef9fdca789"
+     "9013233028d9798f901e5e8efb31841c24c12444d3b6e92580080505d56fd392"
+     "8c7e832be864674c220f9a9361c851917a93f921fedb7717b1b5ece47690c098"
+     "aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
+     default))
  '(package-selected-packages
-   '(lsp-haskell lsp-julia haskell-mode mermaid-mode vterm eaf cmake-mode company dap-mode docker dockerfile-mode doom-themes envrc flycheck gnuplot-mode helm-lsp helm-xref htmlize julia-mode lsp-docker lsp-treemacs lsp-ui matlab-mode nix-mode opencl-mode projectile protobuf-mode pyenv-mode realgud rust-mode which-key windresize yaml-mode yasnippet))
+   '(cmake-mode company dap-mode docker dockerfile-mode doom-themes
+		elvish-mode envrc flycheck helm-lsp helm-xref htmlize
+		julia-mode lsp-ui nix-mode pyenv-mode realgud
+		rust-mode vterm windresize yaml-mode yasnippet))
  '(warning-suppress-types '((comp) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
