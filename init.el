@@ -2,8 +2,6 @@
 (package-initialize)
 (add-to-list `package-archives
 	     '("melpa" . "https://melpa.org/packages/") t)
-;;(add-to-list `package-archives
-;;	     '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 
 (require `package)
 (unless (package-installed-p 'use-package)
@@ -133,33 +131,33 @@
   :ensure t
   :init (envrc-global-mode))
 
-;; Define which hosts should use direnv
-(defcustom my-direnv-enabled-hosts '("mac-mini")  ; Add your hosts here, e.g. '("remote1" "remote2")
-  "List of remote hosts to use Direnv on.
-Each host must have `direnv' executable accessible in the default
-environment."
-  :type '(repeat string)
-  :group 'my)
+;; ;; Define which hosts should use direnv
+;; (defcustom my-direnv-enabled-hosts '("mac-mini")  ; Add your hosts here, e.g. '("remote1" "remote2")
+;;   "List of remote hosts to use Direnv on.
+;; Each host must have `direnv' executable accessible in the default
+;; environment."
+;;   :type '(repeat string)
+;;   :group 'my)
 
-;; Advice to wrap commands with direnv on enabled hosts
-(defun tramp-sh-handle-start-file-process@my-direnv (args)
-  "Enable Direnv for hosts in `my-direnv-enabled-hosts'."
-  (with-parsed-tramp-file-name (expand-file-name default-directory) nil
-    (if (and host (member host my-direnv-enabled-hosts))
-        (pcase-let ((`(,name ,buffer ,program . ,args) args))
-          `(,name
-            ,buffer
-            "direnv"
-            "exec"
-            ,localname
-            ,program
-            ,@args))
-      args)))
+;; ;; Advice to wrap commands with direnv on enabled hosts
+;; (defun tramp-sh-handle-start-file-process@my-direnv (args)
+;;   "Enable Direnv for hosts in `my-direnv-enabled-hosts'."
+;;   (with-parsed-tramp-file-name (expand-file-name default-directory) nil
+;;     (if (and host (member host my-direnv-enabled-hosts))
+;;         (pcase-let ((`(,name ,buffer ,program . ,args) args))
+;;           `(,name
+;;             ,buffer
+;;             "direnv"
+;;             "exec"
+;;             ,localname
+;;             ,program
+;;             ,@args))
+;;       args)))
 
-;; Apply the advice after TRAMP is loaded
-(with-eval-after-load "tramp-sh"
-  (advice-add 'tramp-sh-handle-start-file-process
-              :filter-args #'tramp-sh-handle-start-file-process@my-direnv))
+;; ;; Apply the advice after TRAMP is loaded
+;; (with-eval-after-load "tramp-sh"
+;;   (advice-add 'tramp-sh-handle-start-file-process
+;;               :filter-args #'tramp-sh-handle-start-file-process@my-direnv))
 
 ;; (with-eval-after-load "tramp-sh"
 ;;   (advice-add 'tramp-sh-handle-start-file-process
@@ -201,11 +199,12 @@ environment."
 
 (use-package helm-lsp
   :ensure t)
+
 (use-package helm-xref
   :ensure t)
 
-(use-package lsp-treemacs
-  :ensure t)
+;; (use-package lsp-treemacs
+;;   :ensure t)
 
 (use-package company
   :ensure t
@@ -300,11 +299,12 @@ environment."
         lsp-idle-delay 1.0
         lsp-log-io t)
 
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
-                    :major-modes '(c-mode c++-mode)
-                    :remote? t
-                    :server-id 'clangd-remote)))
+  ;; (lsp-register-client
+  ;;  (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+  ;;                   :major-modes '(c-mode c++-mode)
+  ;;                   :remote? t
+  ;;                   :server-id 'clangd-remote)))
+  )
 
 ;; ;; LSP UI with optimized settings for remote sessions
 ;; (use-package lsp-ui
@@ -350,45 +350,41 @@ environment."
 ;;   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
 
-;; pyenv setup
-(use-package pyenv-mode
-  :ensure t
-  :init
-  (add-to-list 'exec-path "~/.pyenv/shims")
-  (setenv "WORKON_HOME" "~/.pyenv/versions/")
-  :config
-  (pyenv-mode)
-  :bind
-  ("C-x p e" . pyenv-activate-current-project))
-(defun pyenv-activate-current-project ()
-  "Automatically activates pyenv version if .python-version file exists."
-  (interactive)
-  (let ((python-version-directory (locate-dominating-file (buffer-file-name) ".python-version")))
-    (if python-version-directory
-        (let* ((pyenv-version-path (f-expand ".python-version" python-version-directory))
-               (pyenv-current-version (s-trim (f-read-text pyenv-version-path 'utf-8))))
-          (pyenv-mode-set pyenv-current-version)
-          (message (concat "Setting virtualenv to " pyenv-current-version))))))
-(defvar pyenv-current-version nil nil)
+;; ;; pyenv setup
+;; (use-package pyenv-mode
+;;   :ensure t
+;;   :init
+;;   (add-to-list 'exec-path "~/.pyenv/shims")
+;;   (setenv "WORKON_HOME" "~/.pyenv/versions/")
+;;   :config
+;;   (pyenv-mode)
+;;   :bind
+;;   ("C-x p e" . pyenv-activate-current-project))
+;; (defun pyenv-activate-current-project ()
+;;   "Automatically activates pyenv version if .python-version file exists."
+;;   (interactive)
+;;   (let ((python-version-directory (locate-dominating-file (buffer-file-name) ".python-version")))
+;;     (if python-version-directory
+;;         (let* ((pyenv-version-path (f-expand ".python-version" python-version-directory))
+;;                (pyenv-current-version (s-trim (f-read-text pyenv-version-path 'utf-8))))
+;;           (pyenv-mode-set pyenv-current-version)
+;;           (message (concat "Setting virtualenv to " pyenv-current-version))))))
+;; (defvar pyenv-current-version nil nil)
 
-(defun pyenv-init()
-  "Initialize pyenv's current version to the global one."
-  (let ((global-pyenv (replace-regexp-in-string "\n" "" (shell-command-to-string "pyenv global"))))
-    (message (concat "Setting pyenv version to " global-pyenv))
-    (pyenv-mode-set global-pyenv)
-    (setq pyenv-current-version global-pyenv)))
+;; (defun pyenv-init()
+;;   "Initialize pyenv's current version to the global one."
+;;   (let ((global-pyenv (replace-regexp-in-string "\n" "" (shell-command-to-string "pyenv global"))))
+;;     (message (concat "Setting pyenv version to " global-pyenv))
+;;     (pyenv-mode-set global-pyenv)
+;;     (setq pyenv-current-version global-pyenv)))
 
-					(add-hook 'python-mode-hook 'pyenv-init)
+;; 					(add-hook 'python-mode-hook 'pyenv-init)
 
-;; pyvenv setup
-;; (use-package pyvenv
-  ;; :ensure t)
+;; (use-package elvish-mode
+;;   :ensure t)
 
-(use-package elvish-mode
-  :ensure t)
-
-(use-package rust-mode
-  :ensure t)
+;; (use-package rust-mode
+;;   :ensure t)
 
 ;; ======================================================================
 ;; Container setup
@@ -476,8 +472,8 @@ environment."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8"
-     default)))
+   '("aec7b55f2a13307a55517fdf08438863d694550565dee23181d2ebd973ebd6b8" default))
+ '(package-selected-packages nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
